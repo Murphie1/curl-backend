@@ -14,6 +14,7 @@ spec:
       labels:
         app: curl-tool-backend
     spec:
+      serviceAccountName: curl-tool-sa
       containers:
         - name: api
           image: murphyalbert/cookbooks:curl-tool-backend-latest
