@@ -8,9 +8,13 @@ kc.loadFromDefault(); // Loads ~/.kube/config
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const log = new k8s.Log(kc);
 
+
 export async function runCurlPod(curlCommand: string): Promise<string> {
   const jobId = `curl-${randomUUID().slice(0, 8)}`;
   const namespace = "default";
+  const parsedArgs = parse(curlCommand).map(arg =>
+      typeof arg === "object" && "pattern" in arg ? arg.pattern : String(arg)
+      );
 
   // Define pod spec
    const pod = {
