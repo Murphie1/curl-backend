@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: curl-tool-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: curl-tool-backend
+  template:
+    metadata:
+      labels:
+        app: curl-tool-backend
+    spec:
+      containers:
+        - name: api
+          image: murphyalbert/cookbooks:curl-tool-backend-latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: curl-tool-backend
+spec:
+  selector:
+    app: curl-tool-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+      nodePort: 30050  # Pick a number between 30000–32767😅😂
+  type: NodePort
