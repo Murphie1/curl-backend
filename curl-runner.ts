@@ -38,11 +38,14 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
 };
 
   // Create the pod
+  try {
   await k8sApi.createNamespacedPod({
     namespace, 
     body: pod as any
   });
-
+  } catch (e: any) {
+    console.log(e?.message || e?.response.body || "Unknown error");
+  }
   // Wait for pod to complete
   let status = null;
   let retries = 0;
@@ -56,13 +59,13 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
     retries++;
   }
 
-  if (status !== "Succeeded") {
-    await k8sApi.deleteNamespacedPod({
-      name: jobId, 
-      namespace
-    }).catch(() => {});
-    throw new Error(`Pod failed or timed out (status: ${status})`);
-  }
+  //if (status !== "Succeeded") {
+   // await k8sApi.deleteNamespacedPod({
+    //  name: jobId, 
+    //  namespace
+ //   }).catch(() => {});
+  //  throw new Error(`Pod failed or timed out (status: ${status})`);
+//  }
 
   // Capture logs using PassThrough stream
   const stream = new PassThrough();
@@ -80,10 +83,10 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
   });
 
   // Delete pod after completion (or use ttlSecondsAfterFinished if needed)
-  await k8sApi.deleteNamespacedPod({
-    name: jobId,
-    namespace,
-  }).catch(() => {});
+  //await k8sApi.deleteNamespacedPod({
+   // name: jobId,
+  //  namespace,
+//  }).catch(() => {});
 
   return logs.trim();
     }
