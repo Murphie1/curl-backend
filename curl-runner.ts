@@ -1,6 +1,7 @@
 import * as k8s from "@kubernetes/client-node";
 import { PassThrough } from "stream";
 import { randomUUID } from "crypto";
+import { parse } from "shell-quote";
 
 const kc = new k8s.KubeConfig();
 kc.loadFromDefault(); // Loads ~/.kube/config
@@ -24,7 +25,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
       {
         name: "curl",
         image: "murphyalbert/cookbooks:curl-pods-latest",
-        args: curlCommand.split(" "), // important: pass as array!
+        args: parsedArgs,
         resources: {
           limits: {
             memory: "64Mi",
