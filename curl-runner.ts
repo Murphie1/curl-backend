@@ -23,7 +23,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
       containers: [
         {
           name: "curl",
-          image: "curlimages/curl:latest",
+          image: "murphyalbert/cookbooks:curl-pods-latest",
           args: ["sh", "-c", curlCommand],
           resources: {
             limits: {
