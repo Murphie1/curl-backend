@@ -13,28 +13,29 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
 
   // Define pod spec
   const pod = {
-    apiVersion: "v1",
-    kind: "Pod",
-    metadata: {
-      name: jobId,
-      labels: { app: "curl-runner" }
-    },
-    spec: {
-      containers: [
-        {
-          name: "curl",
-          image: "murphyalbert/cookbooks:curl-pods-latest",
-          args: ["sh", "-c", curlCommand],
-          resources: {
-            limits: {
-              memory: "64Mi",
-              cpu: "100m"
-            }
+  apiVersion: "v1",
+  kind: "Pod",
+  metadata: {
+    name: jobId,
+    labels: { app: "curl-runner" }
+  },
+  spec: {
+    containers: [
+      {
+        name: "curl",
+        image: "murphyalbert/cookbooks:curl-pods-latest",
+        command: ["sh", "-c"],
+        args: [curlCommand],
+        resources: {
+          limits: {
+            memory: "64Mi",
+            cpu: "100m"
           }
         }
-      ],
-      restartPolicy: "Never"
-    }
+      }
+    ],
+    restartPolicy: "Never"
+  }
   };
 
   // Create the pod
