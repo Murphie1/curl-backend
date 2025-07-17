@@ -52,7 +52,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
     });
     status = res.status?.phase;
     if (["Succeeded", "Failed"].includes(status!)) break;
-    await new Promise((r) => setTimeout(r, 1000));
+    await new Promise((r: any) => setTimeout(r, 1000));
     retries++;
   }
 
@@ -73,7 +73,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
   });
 
   await new Promise<void>((resolve, reject) => {
-    log.log(namespace, jobId, "curl", stream, (err) => {
+    log.log(namespace, jobId, "curl", stream, (err: any) => {
       if (err) reject(err);
       else resolve();
     });
