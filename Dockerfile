@@ -1,21 +1,14 @@
-# Use a minimal Node.js image
-FROM node:18-alpine
-
-# Set working directory
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-# Copy package files and install deps
 COPY package*.json ./
-RUN npm install
-
-# Copy all source code
+RUN npm ci
 COPY . .
-
-# Build TypeScript code
 RUN npm run build
 
-# Expose port (same as used in server.ts)
+FROM node:18-alpine AS runner
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY --from=builder /app/dist ./dist
 EXPOSE 3000
-
-# Start the compiled app
 CMD ["node", "dist/server.js"]
