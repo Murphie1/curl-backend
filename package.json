@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "scripts": {
     "dev": "ts-node server.ts",
     "start": "node dist/server.js",
