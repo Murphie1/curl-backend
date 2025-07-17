@@ -12,7 +12,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
   const namespace = "default";
 
   // Define pod spec
-  const pod = {
+   const pod = {
   apiVersion: "v1",
   kind: "Pod",
   metadata: {
@@ -24,8 +24,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
       {
         name: "curl",
         image: "murphyalbert/cookbooks:curl-pods-latest",
-        command: ["sh", "-c"],
-        args: [curlCommand],
+        args: curlCommand.split(" "), // important: pass as array!
         resources: {
           limits: {
             memory: "64Mi",
@@ -36,7 +35,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
     ],
     restartPolicy: "Never"
   }
-  };
+};
 
   // Create the pod
   await k8sApi.createNamespacedPod({
