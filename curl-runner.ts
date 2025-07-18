@@ -52,6 +52,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
     podCreated = true;
 
     // Wait for completion
+    try {
     let status;
     for (let retries = 0; retries < 30; retries++) {
       const res = await k8sApi.readNamespacedPodStatus({ name: jobId, namespace });
@@ -59,8 +60,11 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
       if (status === "Succeeded" || status === "Failed") break;
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-
+    } catch (err: any) {
+      throw new Error(`Error polling the pod: ${err?.message || "Unknown error"}`);
+    }
     // Get logs
+    try {
     const res = await k8sApi.readNamespacedPodLog({
      name: jobId,
      namespace,
@@ -68,6 +72,9 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
      //pretty: true,
       });
      return res.trim();
+    } catch (error) {
+      throw new Error(`Error fetching the logs after the pod returned successful: ${error?.message || "Unknown error"}`);
+    }
   } finally {
     // Cleanup pod
     if (podCreated) {
