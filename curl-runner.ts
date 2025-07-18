@@ -72,7 +72,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
      //pretty: true,
       });
      return res.trim();
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Error fetching the logs after the pod returned successful: ${error?.message || "Unknown error"}`);
     }
   } finally {
