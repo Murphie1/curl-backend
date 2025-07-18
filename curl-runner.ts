@@ -67,7 +67,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
      container: "curl",
      pretty: true,
       });
-     return res.body.trim();
+     return res.trim();
   } finally {
     // Cleanup pod
     if (podCreated) {
