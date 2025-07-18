@@ -48,14 +48,14 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
   let podCreated = false;
   try {
     // Create pod
-    await k8sApi.createNamespacedPod(namespace, pod as any);
+    await k8sApi.createNamespacedPod({ namespace, body: pod as any });
     podCreated = true;
 
     // Wait for completion
     let status;
     for (let retries = 0; retries < 30; retries++) {
-      const res = await k8sApi.readNamespacedPodStatus(jobId, namespace);
-      status = res.body.status?.phase;
+      const res = await k8sApi.readNamespacedPodStatus({ name: jobId, namespace });
+      status = res.status?.phase;
       if (status === "Succeeded" || status === "Failed") break;
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
@@ -76,8 +76,8 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
     // Cleanup pod
     if (podCreated) {
       try {
-        await k8sApi.deleteNamespacedPod(jobId, namespace);
-      } catch (e) {
+        await k8sApi.deleteNamespacedPod({ name: jobId, namespace);
+      } catch (e: any) {
         console.error("Pod deletion failed:", e);
       }
     }
