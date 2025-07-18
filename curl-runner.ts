@@ -4,7 +4,7 @@ import { randomUUID } from "crypto";
 import { parse } from "shell-quote";
 
 const kc = new k8s.KubeConfig();
-kc.loadFromDefault();
+kc.loadFromCluster();
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const log = new k8s.Log(kc);
 
