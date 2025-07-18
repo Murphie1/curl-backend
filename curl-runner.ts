@@ -76,7 +76,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
     // Cleanup pod
     if (podCreated) {
       try {
-        await k8sApi.deleteNamespacedPod({ name: jobId, namespace);
+        await k8sApi.deleteNamespacedPod({ name: jobId, namespace });
       } catch (e: any) {
         console.error("Pod deletion failed:", e);
       }
