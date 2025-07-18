@@ -61,17 +61,13 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
     }
 
     // Get logs
-    const stream = new PassThrough();
-    let logs = "";
-    stream.on("data", chunk => logs += chunk.toString());
-    
-    await new Promise<void>((resolve, reject) => {
-      log.log(namespace, jobId, "curl", stream, err => {
-        err ? reject(err) : resolve();
+    const res = await k8sApi.readNamespacedPodLog({
+     name: jobId,
+     namespace,
+     container: "curl",
+     pretty: true,
       });
-    });
-
-    return logs.trim();
+     return res.body.trim();
   } finally {
     // Cleanup pod
     if (podCreated) {
