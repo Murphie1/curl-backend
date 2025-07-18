@@ -5,5 +5,18 @@ metadata:
   namespace: default
 rules:
   - apiGroups: [""]
-    resources: ["pods", "pods/status", "pods/log"]
-    verbs: ["get", "list", "create", "delete", "watch"]
+    resources:
+      - pods
+      - pods/log
+      - pods/status
+      - services
+    verbs: ["get", "list", "create", "delete", "watch", "update", "patch"]
+  - apiGroups: ["batch"]
+    resources:
+      - jobs
+    verbs: ["get", "list", "create", "delete", "watch", "update", "patch"]
+  - apiGroups: ["apps"]
+    resources:
+      - deployments
+      - replicasets
+    verbs: ["get", "list", "create", "delete", "watch", "update", "patch"]
