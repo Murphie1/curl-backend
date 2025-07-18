@@ -65,7 +65,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
      name: jobId,
      namespace,
      container: "curl",
-     pretty: true,
+     //pretty: true,
       });
      return res.trim();
   } finally {
