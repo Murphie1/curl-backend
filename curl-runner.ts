@@ -55,7 +55,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
     try {
     let status;
     for (let retries = 0; retries < 30; retries++) {
-      const res = await k8sApi.readNamespacedPodStatus({ name: jobId, namespace });
+      const res = await k8sApi.readNamespacedPodStatus(jobId, namespace);
       status = res.status?.phase;
       if (status === "Succeeded" || status === "Failed") break;
       await new Promise(resolve => setTimeout(resolve, 1000));
