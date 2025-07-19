@@ -1,30 +1,28 @@
 import * as k8s from "@kubernetes/client-node";
-import { PassThrough } from "stream";
+import { exec } from "child_process";
 import { randomUUID } from "crypto";
 import { parse } from "shell-quote";
+import { promisify } from "util";
 
 const kc = new k8s.KubeConfig();
 kc.loadFromCluster();
 const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-const log = new k8s.Log(kc);
+const execAsync = promisify(exec);
 
 export async function runCurlPod(curlCommand: string): Promise<string> {
   const jobId = `curl-${randomUUID().slice(0, 8)}`;
   const namespace = "default";
-  
-  // Parse command and handle special characters
+
   const parsedArgs = parse(curlCommand)
-    .filter(arg => typeof arg === 'string') // Remove non-string tokens
-    .map(arg => String(arg)); // Ensure all args are strings
+    .filter(arg => typeof arg === 'string')
+    .map(arg => String(arg));
 
   if (parsedArgs.length === 0) {
     throw new Error("Empty curl command");
   }
 
-  // Remove the initial 'curl' if present
   const args = parsedArgs[0] === 'curl' ? parsedArgs.slice(1) : parsedArgs;
 
-  // Define pod spec
   const pod = {
     apiVersion: "v1",
     kind: "Pod",
@@ -35,8 +33,8 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
     spec: {
       containers: [{
         name: "curl",
-        image: "curlimages/curl:latest", // Use official curl image
-        args: args, // Pass processed arguments
+        image: "curlimages/curl:latest",
+        args: args,
         resources: {
           limits: { memory: "64Mi", cpu: "100m" }
         }
@@ -47,41 +45,37 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
 
   let podCreated = false;
   try {
-    // Create pod
+    // Create pod using API (keep this part — it's working)
     await k8sApi.createNamespacedPod({ namespace, body: pod as any });
     podCreated = true;
 
-    // Wait for completion
-    try {
-    let status;
+    // Wait for pod to complete using kubectl
     for (let retries = 0; retries < 30; retries++) {
-      const res = await k8sApi.readNamespacedPodStatus({ name: jobId, namespace });
-      status = res.status?.phase;
-      if (status === "Succeeded" || status === "Failed") break;
+      try {
+        const { stdout } = await execAsync(`kubectl get pod ${jobId} -n ${namespace} -o json`);
+        const podStatus = JSON.parse(stdout);
+        const phase = podStatus.status?.phase;
+        if (phase === "Succeeded" || phase === "Failed") break;
+      } catch (e) {
+        console.warn("kubectl status check failed", e);
+      }
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    } catch (err: any) {
-      throw new Error(`Error polling the pod: ${err?.message || "Unknown error"}`);
-    }
-    // Get logs
+
+    // Fetch logs using kubectl
     try {
-    const res = await k8sApi.readNamespacedPodLog({
-     name: jobId,
-     namespace,
-     container: "curl",
-     //pretty: true,
-      });
-     return res.trim();
+      const { stdout } = await execAsync(`kubectl logs ${jobId} -n ${namespace} curl`);
+      return stdout.trim();
     } catch (error: any) {
-      throw new Error(`Error fetching the logs after the pod returned successful: ${error?.message || "Unknown error"}`);
+      throw new Error(`Error fetching logs with kubectl: ${error?.message || "Unknown error"}`);
     }
   } finally {
-    // Cleanup pod
+    // Delete pod using kubectl
     if (podCreated) {
       try {
-        await k8sApi.deleteNamespacedPod({ name: jobId, namespace });
-      } catch (e: any) {
-        console.error("Pod deletion failed:", e);
+        await execAsync(`kubectl delete pod ${jobId} -n ${namespace}`);
+      } catch (e) {
+        console.error("Pod deletion via kubectl failed:", e);
       }
     }
   }
