@@ -6,16 +6,16 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-#Runner
+# Runner stage with proper kubectl on Alpine
 FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-# Install kubectl (and curl for good measure)
+# Use static kubectl compatible with Alpine
 RUN apk add --no-cache curl bash && \
-    curl -LO https://dl.k8s.io/release/$(curl -sL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl && \
-    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
-    rm kubectl
+    curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
+    chmod +x kubectl && \
+    mv kubectl /usr/local/bin/kubectl
 
 COPY package*.json ./
 RUN npm ci --omit=dev
