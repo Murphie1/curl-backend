@@ -64,7 +64,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
 
     // Fetch logs using kubectl
     try {
-      const { stdout } = await execAsync(`kubectl logs ${jobId} -n ${namespace} curl`);
+      const { stdout } = await execAsync(`kubectl logs ${jobId} -n ${namespace} -c curl`);
       return stdout.trim();
     } catch (error: any) {
       throw new Error(`Error fetching logs with kubectl: ${error?.message || "Unknown error"}`);
