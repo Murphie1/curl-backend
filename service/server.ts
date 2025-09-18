@@ -1,5 +1,5 @@
 import Fastify from "fastify";
-import { runCurlPod } from "./curl-runner.js";
+import { runCurlPod } from "./runner.js";
 
 const app = Fastify();
 
