@@ -62,20 +62,14 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
 
     // Get logs
     try {
-      const logs = await new Promise<string>((resolve, reject) => {
-        let logData = "";
-        log.log(
-          namespace,
-          jobId,
-          "curl",
-          process.stdout, // optional live streaming
-          (data) => {
-            logData += data.toString();
-          },
-          { follow: false, pretty: false, timestamps: false }
-        ).then(() => resolve(logData)).catch(reject);
-      });
-      return logs.trim();
+      const res = await coreV1.readNamespacedPodLog({
+    name: jobId,
+    namespace,
+    containerName,
+    timestamps: false      // timestamps
+    });
+
+  return res.body.trim();
     } catch (err: any) {
       throw new Error(
         `Error fetching logs with Kubernetes API: ${err?.message || "Unknown error"}`
