@@ -53,7 +53,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
     // Poll pod phase until Succeeded/Failed (max ~30s)
     for (let retries = 0; retries < 30; retries++) {
       const res = await coreV1.readNamespacedPod({ name: jobId, namespace });
-      const phase = res.body.status?.phase;
+      const phase = res.status?.phase;
       if (phase === "Succeeded" || phase === "Failed") {
         break;
       }
@@ -84,7 +84,7 @@ export async function runCurlPod(curlCommand: string): Promise<string> {
   } finally {
     if (podCreated) {
       try {
-        await coreV1.deleteNamespacedPod({ name: jobId, namespace 0, true });
+        await coreV1.deleteNamespacedPod({ name: jobId, namespace });
       } catch (e) {
         console.error("Pod deletion via API failed:", e);
       }
