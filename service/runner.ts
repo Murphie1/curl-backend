@@ -8,7 +8,7 @@ const coreV1 = kc.makeApiClient(k8s.CoreV1Api);
 const log = new k8s.Log(kc);
 
 export async function runCurlPod(curlCommand: string): Promise<string> {
-  const jobId = `curl-${randomUUID().slice(0, 8)}`;
+  const jobId = `curl-${randomUUID()}`;
   const namespace = "default";
 
   // Parse curl command into args
